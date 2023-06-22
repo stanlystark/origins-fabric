@@ -5,11 +5,12 @@ import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.origins.Origins;
 import io.github.apace100.origins.badge.Badge;
 import io.github.apace100.origins.badge.BadgeManager;
-import io.github.apace100.origins.mixin.ScreenAccessor;
+import io.github.apace100.origins.mixin.DrawContextInvoker;
 import io.github.apace100.origins.origin.Impact;
 import io.github.apace100.origins.origin.Origin;
 import io.github.apace100.origins.origin.OriginLayer;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
@@ -76,19 +77,19 @@ public class OriginDisplayScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(MatrixStack matrices) {
+    public void renderBackground(DrawContext context) {
         if(showDirtBackground) {
-            super.renderBackgroundTexture(matrices);
+            super.renderBackgroundTexture(context);
         } else {
-            super.renderBackground(matrices);
+            super.renderBackground(context);
         }
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         renderedBadges.clear();
         this.time += delta;
-        this.renderBackground(matrices);
+        this.renderBackground(context);
         this.renderOriginWindow(matrices, mouseX, mouseY);
         super.render(matrices, mouseX, mouseY, delta);
         if(origin != null) {
@@ -171,7 +172,8 @@ public class OriginDisplayScreen extends Screen {
                mouseY < rb.y + 9 &&
                rb.hasTooltip()) {
                 int widthLimit = width - mouseX - 24;
-                ((ScreenAccessor)this).invokeRenderTooltipFromComponents(matrices, rb.getTooltipComponents(textRenderer, widthLimit), mouseX, mouseY, HoveredTooltipPositioner.INSTANCE);
+                ((DrawContextInvoker)this).setMatrices(matrices);
+                ((DrawContextInvoker)this).invokeRenderTooltipFromComponents(textRenderer, rb.getTooltipComponents(textRenderer, widthLimit), mouseX, mouseY, HoveredTooltipPositioner.INSTANCE);
             }
         }
     }

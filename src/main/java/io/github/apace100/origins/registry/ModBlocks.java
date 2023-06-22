@@ -4,7 +4,7 @@ import io.github.apace100.origins.Origins;
 import io.github.apace100.origins.content.TemporaryCobwebBlock;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.Block;
-import net.minecraft.block.Material;
+import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
@@ -13,7 +13,7 @@ import net.minecraft.registry.Registry;
 
 public class ModBlocks {
 
-    public static final Block TEMPORARY_COBWEB = new TemporaryCobwebBlock(FabricBlockSettings.of(Material.COBWEB).noCollision().requiresTool().strength(4.0F));
+    public static final Block TEMPORARY_COBWEB = new TemporaryCobwebBlock(FabricBlockSettings.copyOf(Blocks.COBWEB).noCollision().requiresTool().strength(4.0F));
 
     public static void register() {
         register("temporary_cobweb", TEMPORARY_COBWEB, false);
