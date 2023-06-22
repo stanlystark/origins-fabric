@@ -90,20 +90,20 @@ public class OriginDisplayScreen extends Screen {
         renderedBadges.clear();
         this.time += delta;
         this.renderBackground(context);
-        this.renderOriginWindow(matrices, mouseX, mouseY);
-        super.render(matrices, mouseX, mouseY, delta);
+        this.renderOriginWindow(context, mouseX, mouseY);
+        super.render(context, mouseX, mouseY, delta);
         if(origin != null) {
-            renderScrollbar(matrices, mouseX, mouseY);
-            renderBadgeTooltip(matrices, mouseX, mouseY);
+            renderScrollbar(context, mouseX, mouseY);
+            renderBadgeTooltip(context, mouseX, mouseY);
         }
     }
 
-    private void renderScrollbar(MatrixStack matrices, int mouseX, int mouseY) {
+    private void renderScrollbar(DrawContext context, int mouseX, int mouseY) {
         if(!canScroll()) {
             return;
         }
         RenderSystem.setShaderTexture(0, WINDOW);
-        this.drawTexture(matrices, guiLeft + 155, guiTop + 35, 188, 24, 8, 134);
+        context.drawTexture(WINDOW, guiLeft + 155, guiTop + 35, 188, 24, 8, 134);
         int scrollbarY = 36;
         int maxScrollbarOffset = 141;
         int u = 176;
@@ -116,7 +116,7 @@ public class OriginDisplayScreen extends Screen {
                 u += 6;
             }
         }
-        this.drawTexture(matrices, guiLeft + 156, guiTop + scrollbarY, u, 24, 6, 27);
+        context.drawTexture(WINDOW, guiLeft + 156, guiTop + scrollbarY, u, 24, 6, 27);
     }
 
     private boolean scrolling = false;
@@ -164,7 +164,7 @@ public class OriginDisplayScreen extends Screen {
         return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
 
-    private void renderBadgeTooltip(MatrixStack matrices, int mouseX, int mouseY) {
+    private void renderBadgeTooltip(DrawContext context, int mouseX, int mouseY) {
         for(RenderedBadge rb : renderedBadges) {
             if(mouseX >= rb.x &&
                mouseX < rb.x + 9 &&
@@ -172,7 +172,7 @@ public class OriginDisplayScreen extends Screen {
                mouseY < rb.y + 9 &&
                rb.hasTooltip()) {
                 int widthLimit = width - mouseX - 24;
-                ((DrawContextInvoker)this).setMatrices(matrices);
+                ((DrawContextInvoker)this).setMatrices(context.getMatrices());
                 ((DrawContextInvoker)this).invokeRenderTooltipFromComponents(textRenderer, rb.getTooltipComponents(textRenderer, widthLimit), mouseX, mouseY, HoveredTooltipPositioner.INSTANCE);
             }
         }
@@ -182,57 +182,57 @@ public class OriginDisplayScreen extends Screen {
         return Text.of("Origins");
     }
 
-    private void renderOriginWindow(MatrixStack matrices, int mouseX, int mouseY) {
+    private void renderOriginWindow(DrawContext context, int mouseX, int mouseY) {
         RenderSystem.enableBlend();
-        renderWindowBackground(matrices, 16, 0);
+        renderWindowBackground(context, 16, 0);
         if(origin != null) {
-            this.renderOriginContent(matrices, mouseX, mouseY);
+            this.renderOriginContent(context, mouseX, mouseY);
         }
         RenderSystem.setShaderTexture(0, WINDOW);
-        this.drawTexture(matrices, guiLeft, guiTop, 0, 0, windowWidth, windowHeight);
+        context.drawTexture(WINDOW, guiLeft, guiTop, 0, 0, windowWidth, windowHeight);
         if(origin != null) {
-            renderOriginName(matrices);
+            renderOriginName(context);
             RenderSystem.setShaderTexture(0, WINDOW);
-            this.renderOriginImpact(matrices, mouseX, mouseY);
+            this.renderOriginImpact(context, mouseX, mouseY);
             Text title = getTitleText();
-            this.drawCenteredTextWithShadow(matrices, this.textRenderer, title.getString(), width / 2, guiTop - 15, 0xFFFFFF);
+            context.drawCenteredTextWithShadow(this.textRenderer, title.getString(), width / 2, guiTop - 15, 0xFFFFFF);
         }
         RenderSystem.disableBlend();
     }
 
-    private void renderOriginImpact(MatrixStack matrices, int mouseX, int mouseY) {
+    private void renderOriginImpact(DrawContext context, int mouseX, int mouseY) {
         Impact impact = getCurrentOrigin().getImpact();
         int impactValue = impact.getImpactValue();
         int wOffset = impactValue * 8;
         for(int i = 0; i < 3; i++) {
             if(i < impactValue) {
-                this.drawTexture(matrices, guiLeft + 128 + i * 10, guiTop + 19, windowWidth + wOffset, 16, 8, 8);
+                context.drawTexture(WINDOW, guiLeft + 128 + i * 10, guiTop + 19, windowWidth + wOffset, 16, 8, 8);
             } else {
-                this.drawTexture(matrices, guiLeft + 128 + i * 10, guiTop + 19, windowWidth, 16, 8, 8);
+                context.drawTexture(WINDOW, guiLeft + 128 + i * 10, guiTop + 19, windowWidth, 16, 8, 8);
             }
         }
         if(mouseX >= guiLeft + 128 && mouseX <= guiLeft + 158
             && mouseY >= guiTop + 19 && mouseY <= guiTop + 27) {
             MutableText ttc = Text.translatable(Origins.MODID + ".gui.impact.impact").append(": ").append(impact.getTextComponent());
-            this.renderTooltip(matrices, ttc, mouseX, mouseY);
+            context.drawTooltip(textRenderer, ttc, mouseX, mouseY);
         }
     }
 
-    private void renderOriginName(MatrixStack matrices) {
+    private void renderOriginName(DrawContext context) {
         StringVisitable originName = textRenderer.trimToWidth(getCurrentOrigin().getName(), windowWidth - 36);
-        drawTextWithShadow(matrices, textRenderer, originName.getString(), guiLeft + 39, guiTop + 19, 0xFFFFFF);
+        context.drawTextWithShadow(textRenderer, originName.getString(), guiLeft + 39, guiTop + 19, 0xFFFFFF);
         ItemStack is = getCurrentOrigin().getDisplayItem();
-        this.itemRenderer.renderInGui(matrices, is, guiLeft + 15, guiTop + 15);
+        context.drawItem(is, guiLeft + 15, guiTop + 15);
     }
 
-    private void renderWindowBackground(MatrixStack matrices, int offsetYStart, int offsetYEnd) {
+    private void renderWindowBackground(DrawContext context, int offsetYStart, int offsetYEnd) {
         int border = 13;
         int endX = guiLeft + windowWidth - border;
         int endY = guiTop + windowHeight - border;
         RenderSystem.setShaderTexture(0, WINDOW);
         for(int x = guiLeft; x < endX; x += 16) {
             for(int y = guiTop + offsetYStart; y < endY + offsetYEnd; y += 16) {
-                this.drawTexture(matrices, x, y, windowWidth, 0, Math.max(16, endX - x), Math.max(16, endY + offsetYEnd - y));
+                context.drawTexture(WINDOW, x, y, windowWidth, 0, Math.max(16, endX - x), Math.max(16, endY + offsetYEnd - y));
             }
         }
     }
@@ -245,7 +245,7 @@ public class OriginDisplayScreen extends Screen {
         return retValue;
     }
 
-    private void renderOriginContent(MatrixStack matrices, int mouseX, int mouseY) {
+    private void renderOriginContent(DrawContext context, int mouseX, int mouseY) {
 
         int textWidth = windowWidth - 48;
         // Without this code, the text may not cover the whole width of the window
@@ -267,7 +267,7 @@ public class OriginDisplayScreen extends Screen {
         List<OrderedText> descLines = textRenderer.wrapLines(orgDesc, textWidth);
         for(OrderedText line : descLines) {
             if(y >= startY - 18 && y <= endY + 12) {
-                textRenderer.draw(matrices, line, x + 2, y - 6, 0xCCCCCC);
+                textRenderer.draw(line, x + 2, y - 6, 0xCCCCCC, false, context.getMatrices().peek().getPositionMatrix(), context.getVertexConsumers(), TextRenderer.TextLayerType.NORMAL, 1, 1);
             }
             y += 12;
         }
@@ -277,7 +277,7 @@ public class OriginDisplayScreen extends Screen {
             for(OrderedText line : drawLines) {
                 y += 12;
                 if(y >= startY - 24 && y <= endY + 12) {
-                    textRenderer.draw(matrices, line, x + 2, y, 0xCCCCCC);
+                    textRenderer.draw(line, x + 2, y, 0xCCCCCC, false, context.getMatrices().peek().getPositionMatrix(), context.getVertexConsumers(), TextRenderer.TextLayerType.NORMAL, 1, 1);
                 }
             }
             y += 14;
@@ -290,7 +290,8 @@ public class OriginDisplayScreen extends Screen {
                 Text desc = p.getDescription();
                 List<OrderedText> drawLines = textRenderer.wrapLines(desc, textWidth);
                 if(y >= startY - 24 && y <= endY + 12) {
-                    textRenderer.draw(matrices, name, x, y, 0xFFFFFF);
+                    textRenderer.draw(name, x, y, 0xFFFFFF, false, context.getMatrices().peek().getPositionMatrix(), context.getVertexConsumers(), TextRenderer.TextLayerType.NORMAL, 1, 1);
+
                     int tw = textRenderer.getWidth(name);
                     List<Badge> badges = BadgeManager.getPowerBadges(p.getIdentifier());
                     int xStart = x + tw + 4;
@@ -299,14 +300,14 @@ public class OriginDisplayScreen extends Screen {
                         RenderedBadge renderedBadge = new RenderedBadge(p, badge,xStart + 10 * bi, y - 1);
                         renderedBadges.add(renderedBadge);
                         RenderSystem.setShaderTexture(0, badge.spriteId());
-                        drawTexture(matrices, xStart + 10 * bi, y - 1, 0, 0, 9, 9, 9, 9);
+                        context.drawTexture(badge.spriteId(), xStart + 10 * bi, y - 1, 0, 0, 9, 9, 9, 9);
                         bi++;
                     }
                 }
                 for(OrderedText line : drawLines) {
                     y += 12;
                     if(y >= startY - 24 && y <= endY + 12) {
-                        textRenderer.draw(matrices, line, x + 2, y, 0xCCCCCC);
+                        textRenderer.draw(line, x + 2, y, 0xCCCCCC, false, context.getMatrices().peek().getPositionMatrix(), context.getVertexConsumers(), TextRenderer.TextLayerType.NORMAL, 1, 1);
                     }
                 }
 

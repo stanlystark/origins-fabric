@@ -16,7 +16,7 @@
     "WaterBreathingMixin$UpdateAir"
   ],
   "client": [
-    "ScreenAccessor",
+    "DrawContextInvoker",
     "ServerCheckMixin",
     "WaterVisibilityMixin"
   ],

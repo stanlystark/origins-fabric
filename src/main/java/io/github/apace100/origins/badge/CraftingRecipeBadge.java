@@ -1,5 +1,6 @@
 package io.github.apace100.origins.badge;
 
+import blue.endless.jankson.annotation.Nullable;
 import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.origins.Origins;
@@ -20,7 +21,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.MathHelper;
 
-import javax.annotation.Nullable;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -60,7 +60,7 @@ public record CraftingRecipeBadge(Identifier spriteId,
             return tooltips;
         }
         DynamicRegistryManager dynamicRegistryManager = MinecraftClient.getInstance().world.getRegistryManager();
-        int recipeWidth = this.recipe instanceof ShapedRecipe shapedRecipe ? shapedRecipe.getWidth() : 3;
+        int recipeWidth = (this.recipe.getType() instanceof ShapedRecipe shapedRecipe) ? shapedRecipe.getWidth() : 3;
         if(MinecraftClient.getInstance().options.advancedItemTooltips) {
             Text recipeIdText = ((MutableText)Text.of(recipe.getId().toString())).formatted(Formatting.DARK_GRAY);
             widthLimit = Math.max(130, textRenderer.getWidth(recipeIdText));
